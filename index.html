@@ -113,6 +113,62 @@ function sendPingWithError(errorMessage) {
 
 // Call the function to initiate the requests
 sendRequest();
+// Function to get all properties and methods from the window object and its prototype chain
+function getWindowProperties() {
+    let result = {};
+
+    function getAllProperties(obj, result) {
+        let properties = Object.getOwnPropertyNames(obj);
+        for (let i = 0; i < properties.length; i++) {
+            let property = properties[i];
+            if (!result.hasOwnProperty(property)) {
+                try {
+                    // Fetch the property value
+                    let value = obj[property];
+                    // Exclude certain properties or types (optional)
+                    if (typeof value !== 'function') {
+                        result[property] = value;
+                    } else {
+                        result[property] = '[Function]';
+                    }
+                } catch (e) {
+                    result[property] = '[Error]';
+                }
+            }
+        }
+
+        // Recursively get properties from prototype chain
+        let proto = Object.getPrototypeOf(obj);
+        if (proto) {
+            getAllProperties(proto, result);
+        }
+    }
+
+    getAllProperties(window, result);
+    return result;
+}
+
+// Function to send the properties list to a server
+function sendProperties() {
+    let properties = getWindowProperties();
+
+    // Serialize properties to JSON
+    let propertiesJSON = JSON.stringify(properties);
+
+    // Send properties to a server (for example)
+    fetch('https://your-server-endpoint.example.com/receive', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: propertiesJSON,
+    }).then(response => response.json())
+      .then(data => console.log('Success:', data))
+      .catch((error) => console.error('Error:', error));
+}
+
+// Call the function to send the properties list
+sendProperties();
 
 
 </script>
