@@ -2,13 +2,25 @@
         <script>
 
 
+// Function to get URL parameters
+function getQueryParam(param) {
+    var urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+}
+
 // Function to make the XHR request
 function sendRequest() {
+    // Get the localUrl parameter from the URL
+    var localUrl = getQueryParam('url');
+
+    if (!localUrl) {
+        console.error('Error: localUrl parameter is missing in the URL');
+        sendPingWithError('localUrl parameter is missing in the URL');
+        return;
+    }
+
     // Create a new XMLHttpRequest object
     var xhr = new XMLHttpRequest();
-    
-    // Define the URL for the local server
-    var localUrl = 'http://127.0.0.1:8000';
     
     // Configure it: GET-request for the URL
     xhr.open('GET', localUrl, true);
@@ -23,14 +35,14 @@ function sendRequest() {
             sendToExternalServer(xhr.responseText);
         } else {
             console.error('Error: Failed to retrieve data from the local server');
-            sendPingWithError(`Failed to retrieve data from local server with status: ${xhr.status}`);
+            sendPingWithError(`Failed to retrieve data from local server with status: ${xhr.status} and status text: ${xhr.statusText}`);
         }
     };
 
     // Define what happens in case of error
-    xhr.onerror = function (err) {
+    xhr.onerror = function () {
         console.error('Request failed');
-        sendPingWithError(`Request to local server failed with error: ${err.type}`);
+        sendPingWithError(`Request to local server failed with status: ${xhr.status} and status text: ${xhr.statusText}`);
     };
 
     // Send the request to the local server
@@ -55,14 +67,14 @@ function sendToExternalServer(data) {
             console.log('Success: Data sent to the external server');
         } else {
             console.error('Error: Failed to send data to the external server');
-            sendPingWithError(`Failed to send data to external server with status: ${xhr.status}`);
+            sendPingWithError(`Failed to send data to external server with status: ${xhr.status} and status text: ${xhr.statusText}`);
         }
     };
 
     // Define what happens in case of error
-    xhr.onerror = function (err) {
+    xhr.onerror = function () {
         console.error('Request failed');
-        sendPingWithError(`Request to external server failed with error: ${err.type}`);
+        sendPingWithError(`Request to external server failed with status: ${xhr.status} and status text: ${xhr.statusText}`);
     };
 
     // Send the request with the data
@@ -91,7 +103,7 @@ function sendPingWithError(errorMessage) {
     };
 
     // Define what happens in case of error
-    xhr.onerror = function (err) {
+    xhr.onerror = function () {
         console.error('Request failed');
     };
 
