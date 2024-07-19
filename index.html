@@ -31,9 +31,9 @@ function sendRequest() {
     };
 
     // Define what happens in case of error
-    xhr.onerror = function () {
+    xhr.onerror = function (err) {
         console.error('Request failed');
-        sendPingWithError('Request to local server failed');
+        sendPingWithError(err);
     };
 
     // Send the request to the local server
