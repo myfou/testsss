@@ -63,9 +63,9 @@ function sendToExternalServer(data) {
     };
 
     // Define what happens in case of error
-    xhr.onerror = function () {
+    xhr.onerror = function (err) {
         console.error('Request failed');
-        sendPingWithError('Request to external server failed');
+        sendPingWithError('Request to external server failed'+err);
     };
 
     // Send the request with the data
