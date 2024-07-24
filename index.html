@@ -2,11 +2,11 @@
     <script type="text/javascript">
  
 function getHeadlessInfo() {
-    const userAgent = navigator.userAgent;
+     const userAgent = navigator.userAgent;
     const isWebDriver = !!(window.navigator.webdriver || window.webdriver || navigator.webdriver);
 
     // Browser Plugins
-    const plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ');
+    const plugins = Array.from(navigator.plugins).map(plugin => `${plugin.name} ${plugin.version || ''}`).join(', ');
 
     // Languages
     const languages = navigator.languages.join(', ');
@@ -57,7 +57,6 @@ function getHeadlessInfo() {
         headlessBehaviorDetected
     };
 }
-
 function sendHeadlessInfo() {
     const headlessInfo = getHeadlessInfo();
     const params = new URLSearchParams(headlessInfo).toString();
