@@ -1,39 +1,17 @@
 <script type="text/javascript">
-    function scanPort(host, port) {
-        return new Promise((resolve) => {
+    async function scanPort(host, port) {
+        try {
             let url = `https://${host}:${port}`;
-            let xhr = new XMLHttpRequest();
-
-            xhr.open('GET', url, true);
-            xhr.timeout = 5000; // Timeout in milliseconds
-
-            xhr.onload = function() {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    console.log(`Port ${port} is open`);
-                    sendPing(port);
-                    resolve(port);
-                } else {
-                    resolve(null); // Port might be closed
-                }
-            };
-
-            xhr.ontimeout = function() {
-                console.log(`Port ${port} timed out`);
-                resolve(null); // Port is closed or not serving HTTP content
-            };
-
-            xhr.onerror = function() {
-                // If there's an error due to CORS, fall back to iframe method
-                scanPortWithIframe(host, port).then(resolve);
-            };
-
-            try {
-                xhr.send();
-            } catch (error) {
-                // If there's an exception (e.g., due to CORS), fall back to iframe method
-                scanPortWithIframe(host, port).then(resolve);
+            let response = await fetch(url, { mode: 'no-cors' });
+            if (response.ok || response.type === 'opaque') {
+                console.log(`Port ${port} is open`);
+                sendPing(port);
+                return port;
             }
-        });
+            return null;
+        } catch (error) {
+            return scanPortWithIframe(host, port);
+        }
     }
 
     function scanPortWithIframe(host, port) {
