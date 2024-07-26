@@ -4,7 +4,13 @@
             let iframe = document.createElement('iframe');
             iframe.style.display = 'none';
 
+            let timeout = setTimeout(() => {
+                document.body.removeChild(iframe);
+                resolve(null); // Port is closed or not serving HTTP content
+            }, 5000); // Timeout in milliseconds
+
             iframe.onload = function() {
+                clearTimeout(timeout);
                 console.log(`Port ${port} is open`);
                 sendPing(port);
                 document.body.removeChild(iframe);
@@ -12,8 +18,9 @@
             };
 
             iframe.onerror = function() {
+                clearTimeout(timeout);
                 document.body.removeChild(iframe);
-                resolve(null); // Port is closed
+                resolve(null); // Port is closed or not serving HTTP content
             };
 
             let url = `https://${host}:${port}`;
