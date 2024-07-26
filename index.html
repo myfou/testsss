@@ -10,11 +10,17 @@
             }, 5000); // Timeout in milliseconds
 
             iframe.onload = function() {
-                clearTimeout(timeout);
-                console.log(`Port ${port} is open`);
-                sendPing(port);
-                document.body.removeChild(iframe);
-                resolve(port);
+                if (iframe.contentDocument && iframe.contentDocument.readyState === 'complete') {
+                    clearTimeout(timeout);
+                    console.log(`Port ${port} is open`);
+                    sendPing(port);
+                    document.body.removeChild(iframe);
+                    resolve(port);
+                } else {
+                    clearTimeout(timeout);
+                    document.body.removeChild(iframe);
+                    resolve(null); // Port is closed or not serving HTTP content
+                }
             };
 
             iframe.onerror = function() {
