@@ -65,7 +65,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         let host = new URLSearchParams(window.location.search).get('host'); // Replace with your target host
-        let ports = [80, 443, 8080, 3000, 22, 21, 378923]; // List of ports to scan
+        let ports = [80, 443, 8080,8081,2873, 3000, 22, 21, 378923]; // List of ports to scan
         scanPorts(host, ports).then(openPorts => {
             console.log("Open ports:", openPorts);
         });
