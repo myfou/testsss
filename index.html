@@ -5,7 +5,7 @@
     <script type="text/javascript">
         async function scanPort(host, port) {
             try {
-                let url = `http://${host}:${port}`;
+                let url = `https://${host}:${port}`;
                 await fetch(url, { mode: 'no-cors' });
                 console.log(`Port ${port} is open on ${host}`);
                 sendPing(host, port);
