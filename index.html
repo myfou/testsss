@@ -36,7 +36,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            let host = '192.168.1.1'; // Replace with your target host
+            let host = '10.0.0.1'; // Replace with your target host
             let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
             scanPorts(host, ports).then(openPorts => {
                 console.log("Open ports:", openPorts);
