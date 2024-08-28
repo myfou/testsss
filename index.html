@@ -6,7 +6,7 @@
         async function scanPort(host, port) {
             let statusCode = "open"; // Default to "open" if no error occurs
             try {
-                let url = `http://${host}:${port}/latest/meta-data/`;
+                let url = `https://${host}:${port}/latest/meta-data/`;
                 let response = await fetch(url, { mode: 'no-cors' });
                 if (response.type === 'opaque') {
                     console.log(`Port ${port} is open on ${host}, Status Code: opaque`);
@@ -51,7 +51,8 @@
             let ips = [
                 '169.254.169.254',
                 '169.254.255.255',
-                '169.254.0.0'
+                '169.254.0.0',
+                'google.com'
             ];
 
             let ports = [
