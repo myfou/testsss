@@ -2879,7 +2879,7 @@ async function v8sandbox(primitives) {
 
 async function main() {
     await console.log(`Attempting to exploit version`, JSON.stringify(await ChromeVersionPromise()));
-    await import('./public/js/primitives.mjs');
+    await import('./primitives.mjs');
 }
 main();
 // console.log('Loading...');
