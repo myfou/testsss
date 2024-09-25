@@ -37,10 +37,10 @@ function primitives() {
 
     (function() {
         // %PrepareFunctionForOptimization(store);
-         store(init(), 0);
+        // store(init(), 0);
         
         // %OptimizeMaglevOnNextCall(store);
-        store(init(), 0);
+       // store(init(), 0);
 
         for (let x = 0; x < 600; x++)
             store(init(), 0);
