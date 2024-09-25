@@ -36,10 +36,10 @@ function primitives() {
     }
 
     (function() {
-         %PrepareFunctionForOptimization(store);
+        // %PrepareFunctionForOptimization(store);
          store(init(), 0);
         
-         %OptimizeMaglevOnNextCall(store);
+        // %OptimizeMaglevOnNextCall(store);
         store(init(), 0);
 
         for (let x = 0; x < 600; x++)
