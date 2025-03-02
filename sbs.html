@@ -2844,7 +2844,7 @@ async function v8sandbox(primitives) {
 
         let addr_instance = addrOf(instance);
         let jmp_table = cagedRead(addr_instance + BigInt(offsets.instance_jmptable));
-        await console.log("Jmp Table address:", to_hex(jmp_table));
+       
 
         
         // cagedWrite(addr_instance + BigInt(offsets.instance_jmptable), jmp_table + BigInt(0x0734));
