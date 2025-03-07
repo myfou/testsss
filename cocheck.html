@@ -30,8 +30,7 @@ Promise.all(requests).then(() => {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(report),
-        credentials: 'omit'
+        body: JSON.stringify(report)
     })
     .then(response => console.log('Report sent:', response.status))
     .catch(error => console.log('Failed to send report:', error));
