@@ -1,12 +1,8 @@
 <script>
   // List of local IP addresses to test (customize as needed)
   const localIPs = [
-    "127.0.0.1",
-    "localhost",
-    "0.0.0.0",
-    "192.168.0.1",
-    "192.168.1.1",
-    "10.0.0.1"
+    "chat-internal.snapchat.com",
+    "internal.9.gs.bmt.cognac.snapchat.com"
   ];
 
   // List of ports to test
@@ -18,7 +14,7 @@
   // Loop through each IP and port combination
   localIPs.forEach(ip => {
     ports.forEach(port => {
-      const url = `http://${ip}:${port}`;
+      const url = `https://${ip}`;
       requests.push(
         fetch(url, {
           method: 'GET',
