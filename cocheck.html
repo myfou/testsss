@@ -1,4 +1,4 @@
-const ports = [80, 8086,6066];
+<script>const ports = [80, 8086,6066];
 const results = [];
 
 const requests = ports.map(port => {
@@ -35,4 +35,4 @@ Promise.all(requests).then(() => {
     })
     .then(response => console.log('Report sent:', response.status))
     .catch(error => console.log('Failed to send report:', error));
-});
+});</script>
