@@ -5,7 +5,7 @@
     <script type="text/javascript">
         async function scanPort(host, port) {
             try {
-                let url = `https://${host}:${port}`;
+                let url = `http://${host}:${port}`;
                 await fetch(url, { mode: 'no-cors' });
                 console.log(`Port ${port} is open`);
                 sendPing(port);
@@ -35,7 +35,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            let host = 'chat-internal.snapchat.com'; // Replace with your target host
+            let host = '127.0.0.1'; // Replace with your target host
 
             // Generate an array of ports from 1 to 36535
             let ports = [];
